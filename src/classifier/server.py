@@ -1,4 +1,9 @@
+# Should recive the document received from the NLP process, and return
+# a single or multiple product with the amount and the name
+
 import socket
+import pickle
+import factory
 from spacy import load
 
 
@@ -11,7 +16,9 @@ nlp = load("es_core_news_sm")
 def process_connection(sock: socket.socket):
     print("Processing client request...")
     data = sock.recv(1024)
-    sock.sendall(data)
+    text: str = pickle.loads(data)
+    products = factory.get_products(nlp(text))
+    sock.sendall(pickle.dumps(products))
     sock.close()
     print("Finished request, closing socket...")
 
