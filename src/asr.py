@@ -1,4 +1,5 @@
 import speech_recognition as sr
+from client import get_products_from_sentence
 
 r = sr.Recognizer()
 
@@ -39,25 +40,38 @@ months = [
 ]
 
 
-def create_invoice(txt: str):
+def process_invoice_order(txt: str):
     words = txt.split()
     keyword = words[0]
-    if keyword == "factura":
-        client = " ".join(words[1 : len(words) - 1])
-        month = words[len(words) - 1]
-        if month in months:
-            global current_invoice
-            current_invoice = Invoice(client, month)
-            global invoice_opened
-            invoice_opened = True
-        else:
-            print("Month is not valid")
-    else:
-        print("Keyword is not valid")
+    month = words[len(words) - 1]
+    client = " ".join(words[1 : len(words) - 1])
+    return keyword, client, month
 
 
-def add_expense(txt: str):
-    current_invoice.add_expense(txt)
+def create_invoice(txt: str):
+    keyword, client, month = process_invoice_order(txt)
+    if keyword != "factura":
+        return print("Keyword is not valid")
+    if month not in months:
+        return print("Month is not valid")
+    global current_invoice
+    global invoice_opened
+    current_invoice = Invoice(client, month)
+    invoice_opened = True
+
+
+def print_products(products):
+    print("\n")
+    for p in products:
+        print(p.__str__())
+        print("\n")
+    print("\n")
+
+
+def get_processed_text(txt: str):
+    print("requesting products to server...")
+    products = get_products_from_sentence(txt)
+    print_products(products)
 
 
 def process_sentence(txt: str):
@@ -70,7 +84,8 @@ def process_sentence(txt: str):
             global listening
             listening = False
         else:
-            add_expense(lower_txt)
+            get_processed_text(lower_txt)
+            current_invoice.add_expense(lower_txt)
 
 
 def print_current_invoice():
@@ -86,23 +101,23 @@ while listening:
         r.adjust_for_ambient_noise(source)
         r.pause_threshold = 0.5
 
-        print("Next order..." if invoice_opened else "Waiting for invoice...")
+        if invoice_opened:
+            print("Next order...")
+        else:
+            print("watiing for invoice...")
+
         if invoice_opened and current_invoice:
             print_current_invoice()
 
         audio = r.listen(source)
-
         try:
             text = r.recognize_google(audio, language="es-ES")
             process_sentence(text)
-        except sr.UnknownValueError:
+        except sr.UnknownValueError as e:
+            print(e)
             print("Google Speech Recognition could not understand audio")
         except sr.RequestError as e:
-            print(
-                "Could not request results from Google Speech Recognition service; {0}".format(
-                    e
-                )
-            )
+            print("Google Speech Recognition service is not reachable {0}".format(e))
 
 
 print("Programm finished")

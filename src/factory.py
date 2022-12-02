@@ -34,8 +34,11 @@ def get_products(tokens: list[Token]):
                 products.append(product)
 
             product = Product()
-            amount = text2num(token.text, "es")
-            product.set_amount(amount)
+            try:
+                amount = text2num(token.text, "es")
+                product.set_amount(amount)
+            except ValueError:
+                product.set_amount(int(token.text))
 
         if token.pos_ == "NOUN" or token.pos_ == "PROPN":
             # We should not add the token, we should process it again.

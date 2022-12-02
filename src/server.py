@@ -17,6 +17,7 @@ def process_connection(sock: socket.socket):
     print("Processing client request...")
     data = sock.recv(1024)
     text: str = pickle.loads(data)
+    print("Server text --> ", text)
     products = factory.get_products(nlp(text))
     sock.sendall(pickle.dumps(products))
     sock.close()

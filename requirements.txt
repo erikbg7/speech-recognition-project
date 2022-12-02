@@ -6,3 +6,5 @@ en-core-web-md @ https://github.com/explosion/spacy-models/releases/download/en_
 es-core-news-lg @ https://github.com/explosion/spacy-models/releases/download/es_core_news_lg-3.4.0/es_core_news_lg-3.4.0-py3-none-any.whl
 es-core-news-md @ https://github.com/explosion/spacy-models/releases/download/es_core_news_md-3.4.0/es_core_news_md-3.4.0-py3-none-any.whl
 es-core-news-sm @ https://github.com/explosion/spacy-models/releases/download/es_core_news_sm-3.4.0/es_core_news_sm-3.4.0-py3-none-any.whl
+
+#comm
