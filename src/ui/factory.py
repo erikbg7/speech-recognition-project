@@ -1,3 +1,4 @@
+import json
 from spacy.tokens import Token
 from text_to_num import text2num
 
@@ -15,6 +16,9 @@ class Product:
 
     def __str__(self) -> str:
         return f"amount: {self.amount}, tokens: {self.tokens}"
+
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
 
 def is_amount(token: Token):
