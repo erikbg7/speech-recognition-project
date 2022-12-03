@@ -1,34 +1,54 @@
 
 <html>
   <head>
-    <title>My App</title>
+    <title>Speech To Invoice Test</title>
   </head>
   <body>
-    <h1>My App</h1>
-    <p>My App is running.</p>
+    <h1>Speech To Invoice Test</h1>
+
     <div>
-      <span>Status:</span>
-      <span id="status"></span>
+      <span>
+        <strong>Status:</strong>
+      </span>
+      <span id="status">Paused</span>
     </div>
-    <div id="results">
-      <span id="final_span" class="final"></span>
-      <span id="interim_span" class="interim"></span>
-      <p>
+
+    <div>
+      <span>
+        <strong>Transcription:</strong>
+      </span>
+      <span id="results">
+        <span id="final_span" class="final"></span>
+        <span id="interim_span" class="interim"></span>
+      </span>
     </div>
+
+    <div>
+      <span>
+        <strong>Invoice:</strong>
+      </span>
+      <pre id="invoice"></pre>
+    </div>
+
     <button onclick="init()">Click</button>
-    <button onclick="process()">Post</button>
+    <button onclick="process('3 barras de quarto')">Test Post</button>
   </body>
   <script>
 
-    function process() {
+    function process(t) {
+      console.log('request', t)
       fetch('http://127.0.0.1:5000/process-data', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: "This is my text"
+        body: t
       }).then(response => response.json())
-        .then(data => console.log(data));
+        .then(data => {
+          console.log(data)
+          const invoice = document.getElementById("invoice")
+          invoice.innerHTML = JSON.stringify(data, null, 4)
+        });
     }
 
 
@@ -40,6 +60,7 @@
     let final_transcript = '';
     let final_span = document.getElementById('final_span');
     let interim_span = document.getElementById('interim_span');
+    let recognition_status = document.getElementById('status');
 
     const one_line = /\n/g;
     const two_line = /\n\n/g;
@@ -48,16 +69,24 @@
     }
 
     function init() {
+      final_transcript = ""
+      final_span.innerHTML = '';
+      interim_span.innerHTML = '';
       recognition.start();
-      document.getElementById('status').innerHTML = 'Listening...';
+      recognition_status.innerHTML = 'Listening...';
     }
 
     // This event needs recognition.continuous = false to be triggered
     // We will need to restart the speech recognition after this event
-    // recognition.onspeechend = (event) => {
-    //   console.log({event})
-    //   console.log('Speech has stopped being detected');
-    // }
+    recognition.onspeechend = () => {
+      console.log('final', final_transcript)
+      process(final_transcript);
+      final_transcript = '';
+      final_span.innerHTML = '';
+      interim_span.innerHTML = '';
+      recognition_status.innerHTML = 'Paused';
+      console.log('Speech has stopped being detected');
+    }
 
     recognition.onresult = function(event) {
       var interim_transcript = '';

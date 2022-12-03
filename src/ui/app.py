@@ -13,4 +13,4 @@ def home():
 def process_data():
     text = request.data.decode("utf-8")
     results = process_request(text)
-    return results[0].toJSON()
+    return results[0].toJSON() if len(results) > 0 else {}
